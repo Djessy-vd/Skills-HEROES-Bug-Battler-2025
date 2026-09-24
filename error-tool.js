@@ -40,9 +40,8 @@ function add_error (){
         if (priority === 'low' || priority === 'medium' || priority === 'high') {
             console.log(`de priority is ${priority}`);
         }   else {
-            rl.close
+            
             console.log("er is een foutive antwoord gegeven probeer het opniew")
-            exit
             add_error();
         }
         
@@ -50,14 +49,14 @@ function add_error (){
         
         // het interface sluiten
         rl.close();
-        console.log(title, priority)
+        console.log("\x1b[35mer is een bugg aagemaakt met de volgende titel: " + title + " en de priority is: " + priority + "\x1b[0m");
     });
     });
 
-    // ff testje
-    rl.on('close', () => {
-        console.log('Interface closed. Goodbye!');
-    });
+    // // ff testje
+    // rl.on('close', () => {
+    //     console.log('I');
+    // });
 
 
 }
