@@ -37,20 +37,24 @@ function add_error (){
 
     // de priority vraag
     rl.question('error priority (low / medium / high) ', (priority) => {
-        if (priority === 'low' || priority === 'medium' || priority === 'high') {
-            console.log(`de priority is ${priority}`);
-        }   else {
-            
-            console.log("er is een foutive antwoord gegeven probeer het opniew")
-            add_error();
+        if (!['low', 'medium', 'high'].includes(priority)) {
+            console.log("er is een foutive antwoord gegeven probeer het opniew");
+            rl.close();
+            return;
         }
-        
-        
-        
-        // het interface sluiten
-        rl.close();
-        console.log("\x1b[35mer is een bugg aagemaakt met de volgende titel: " + title + " en de priority is: " + priority + "\x1b[0m");
-    });
+
+        console.log(`de priority is ${priority}`);
+        rl.question('status (gaande / opgelost / gesloten) ', (status) => {
+            if (!['gaande', 'opgelost', 'gesloten'].includes(status)) {
+                console.log("er is een foutive antwoord gegeven probeer het opniew");
+                rl.close();
+                return;
+            }
+
+            console.log(`de status is ${status}`);
+            rl.close();
+            console.log("\x1b[35mer is een bugg aagemaakt met de volgende titel: " + title + " en de priority is: " + priority + " en de status is: " + status + "\x1b[0m");
+        });
     });
 
     // // ff testje
@@ -59,6 +63,6 @@ function add_error (){
     // });
 
 
+});
 }
-
 add_error();
