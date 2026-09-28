@@ -1,68 +1,73 @@
 //require
-const readline = require('node:readline');
 const fs = require('fs');
-const { exit, kill, exitCode } = require('node:process');
 
 console.log('\x1b[33mde error tool is succesvol opgestart\x1b[0m');
 
-
 //hier declare ik alvast alle variable
+const filePath = './data.json';
 let errors = [];
 
-
-//hier maak ik de functie die kijkt of eer al een json bestand is en zo ja of hij correct is en als hij nog niet bestaad dat hij dan word gemaakt 
-function json (){
-    const filePath = "./data.json";
-    const content = '{}'
-    if (fs.existsSync(filePath)) {
-        console.log('\x1b[32mdata het bestand is er al en is goed\x1b[0m');    
-    } else {
-        console.log('\x1b[31mdata bestand bestaad niet\x1b[0m');
-        fs.writeFileSync(filePath, content);
-        console.log('\x1b[32mde data bestand is aangemaakt voor je\x1b[0m');
+function load_errors () {
+    if (!fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, '[]');
     }
-};
-// functie uitvoen om te controleren of het data bestand bestaad
-console.log(json())
-
-function add_error (){
-        const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    // de vragen voor de gebruiker
-    rl.question('error-title: ', (title) => {
-    console.log(`de error title is ${title}!`);
-
-    // de priority vraag
-    rl.question('error priority (low / medium / high) ', (priority) => {
-        if (!['low', 'medium', 'high'].includes(priority)) {
-            console.log("er is een foutive antwoord gegeven probeer het opniew");
-            rl.close();
-            return;
-        }
-
-        console.log(`de priority is ${priority}`);
-        rl.question('status (gaande / opgelost / gesloten) ', (status) => {
-            if (!['gaande', 'opgelost', 'gesloten'].includes(status)) {
-                console.log("er is een foutive antwoord gegeven probeer het opniew");
-                rl.close();
-                return;
-            }
-
-            console.log(`de status is ${status}`);
-            rl.close();
-            console.log("\x1b[35mer is een bugg aagemaakt met de volgende titel: " + title + " en de priority is: " + priority + " en de status is: " + status + "\x1b[0m");
-        });
-    });
-
-    // // ff testje
-    // rl.on('close', () => {
-    //     console.log('I');
-    // });
-
-
-});
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
-add_error();
+
+function save () {
+    fs.writeFileSync(filePath, JSON.stringify(errors, null, 2));
+}
+
+function add (title, description, priority, status) {
+    if (!title || !priority || !status) {
+        console.log('gebruik: add-report titel description priority status');
+        return;
+    }
+
+    if (!['low', 'medium', 'high'].includes(priority)) {
+        console.log('priority moet low, medium of high zijn');
+        return;
+    }
+
+    if (!['open', 'in_progress', 'closed'].includes(status)) {
+        console.log('status moet open, in_progress of closed zijn');
+        return;
+    }
+
+    errors.push({ id: errors.length + 1, title, description: description || 'geen beschrijving', priority, status });
+    save();
+    console.log('\x1b[35mer is een bug aangemaakt\x1b[0m');
+}
+
+function list (status, priority) {
+    const found_errors = errors.filter((error) => error.status === status && (!priority || error.priority === priority));
+
+    found_errors.forEach((error) => {
+        console.log('ID: ' + error.id);
+        console.log('title: ' + error.title);
+        console.log('description: ' + error.description);
+        console.log('priority: ' + error.priority);
+        console.log('status: ' + error.status);
+        console.log('----------------');
+    });
+
+    if (found_errors.length === 0) {
+        console.log('geen bugreports gevonden');
+    }
+}
+
+errors = load_errors();
+
+const command = process.argv[2];
+const values = process.argv.slice(3);
+
+if (command === 'list-reports') {
+    list(values[0], values[1]);
+} else if (command === 'help') {
+    console.log('node error-tool.js titel description priority status');
+    console.log('node error-tool.js list-reports status priority');
+} else if (command === 'add-report') {
+    add(values[0], values[1], values[2], values[3]);
+} else {
+    add(process.argv[2], process.argv[3], process.argv[4], process.argv[5]);
+}
